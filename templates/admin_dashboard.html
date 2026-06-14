@@ -1,15 +1,33 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Admin Dashboard</title>
 </head>
+
 <body>
 
 <h1>Admin Dashboard</h1>
-<h3>Welcome {{ current_user.name }}</h3><br>
 
-<a href="/add_staff">Add Staff</a><br><br>
+<h3>Welcome {{ current_user.name }}</h3>
+
+<hr>
+
+<h2>Stats</h2>
+
+<p>Total Users: {{ data.users }}</p>
+<p>Total Staff: {{ data.staff }}</p>
+<p>Total Treks: {{ data.treks }}</p>
+<p>Total Bookings: {{ data.bookings }}</p>
+
+<hr>
+
+<h2>Manage</h2>
+
+<a href="/admin/users"><button>Manage Users</button></a>
+<a href="/admin/treks"><button>Manage Treks</button></a>
+<a href="/admin/bookings"><button>Manage Bookings</button></a><br><br>
+<a href="/add_staff"><button>Add Staff</button></a>
+
 <a href="/logout">Logout</a>
 
 </body>

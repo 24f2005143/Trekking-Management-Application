@@ -1,13 +1,56 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Dashboard</title>
-</head>
-<body>
-
 <h1>User Dashboard</h1>
 <h3>Welcome {{ current_user.name }}</h3>
+
 <a href="/logout">Logout</a>
 
-</body>
-</html>
+<hr>
+
+<h2>Available Treks</h2>
+
+<table border="1">
+<tr>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Difficulty</th>
+    <th>Action</th>
+</tr>
+
+{% for trek in treks %}
+<tr>
+    <td>{{ trek.trek_name }}</td>
+    <td>{{ trek.location }}</td>
+    <td>{{ trek.difficulty }}</td>
+
+    <td>
+        <form method="POST" action="/book_trek/{{ trek.id }}">
+            <button type="submit">Book</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+</table>
+
+<hr>
+
+<h2>My Bookings</h2>
+
+<table border="1">
+<tr>
+    <th>Trek ID</th>
+    <th>Status</th>
+    <th>Payment</th>
+    <th>Action</th>
+</tr>
+
+{% for b in bookings %}
+<tr>
+    <td>{{ b.trek_id }}</td>
+    <td>{{ b.booking_status }}</td>
+    <td>{{ b.payment_status }}</td>
+
+    <td>
+        <a href="/cancel_booking/{{ b.id }}">Cancel</a>
+    </td>
+</tr>
+{% endfor %}
+</table>

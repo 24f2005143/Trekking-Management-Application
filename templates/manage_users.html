@@ -1,0 +1,74 @@
+<h1>Manage Users</h1>
+
+<a href="/admin">Back</a>
+
+<form method="GET" action="/admin/users">
+    <input type="text" name="search" placeholder="Search users">
+    <button type="submit">Search</button>
+</form>
+
+<br>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Role</th>
+    <th>Status</th>
+    <th>Action</th>
+</tr>
+
+{% for user in users %}
+<tr>
+    <td>{{ user.id }}</td>
+    <td>{{ user.name }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.role }}</td>
+
+    <td>
+        {% if user.is_blacklisted %}
+            <span style="color:red;">Blacklisted</span>
+        {% else %}
+            <span style="color:green;">Active</span>
+        {% endif %}
+    </td>
+
+    <td>
+
+        {% if user.role == 'admin' %}
+            <b>Admin</b>
+
+        {% elif user.role == 'staff' %}
+
+            <a href="/remove_staff/{{ user.id }}">
+                <button style="background-color:black; color:white;">
+                    Remove Staff
+                </button>
+            </a>
+
+        {% else %}
+
+            {% if user.is_blacklisted %}
+                <a href="/unblock_user/{{ user.id }}">
+                    <button style="background-color: green; color: white;">
+                        Unblock
+                    </button>
+                </a>
+            {% else %}
+                <a href="/block_user/{{ user.id }}">
+                    <button style="background-color: red; color: white;">
+                        Block
+                    </button>
+                </a>
+            {% endif %}
+
+        {% endif %}
+
+    </td>
+
+</tr>
+{% endfor %}
+
+</table>

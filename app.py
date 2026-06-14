@@ -1,13 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, User, StaffProfile
+from models import db, User, StaffProfile,Trek,Booking
+from flask_login import LoginManager,login_user,logout_user,login_required,current_user
 
-from flask_login import LoginManager
-from flask_login import login_user
-from flask_login import logout_user
-from flask_login import login_required
-from flask_login import current_user
+from routes.admin_routes import admin_bp
+from routes.user_routes import user_bp
 
 app = Flask(__name__)
+app.register_blueprint(admin_bp)
+app.register_blueprint(user_bp)
 
 app.config['SECRET_KEY'] = 'secret123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///trek.db'
@@ -25,7 +25,6 @@ def load_user(user_id):
 
 
 with app.app_context():
-
     db.create_all()
 
     admin = User.query.filter_by(role='admin').first()
@@ -84,10 +83,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = User.query.filter_by(
-            email=email,
-            password=password
-        ).first()
+        user = User.query.filter_by(email=email,password=password).first()
 
         if user:
             if user.is_blacklisted:
@@ -96,7 +92,7 @@ def login():
             login_user(user)
 
             if user.role == 'admin':
-                return redirect(url_for('admin_dashboard'))
+                return redirect('/admin')
             elif user.role == 'staff':
                 return redirect(url_for('staff_dashboard'))
             else:
@@ -115,13 +111,6 @@ def logout():
     return redirect(url_for('login'))
 
 
-@app.route('/admin')
-@login_required
-def admin_dashboard():
-
-    if current_user.role != 'admin':
-        return "Access Denied"
-    return render_template('admin_dashboard.html')
 
 
 @app.route('/staff')
@@ -171,10 +160,7 @@ def add_staff():
         db.session.commit()
 
         return "Staff Added Successfully"
-
-    return render_template(
-        'add_staff.html'
-    )
+    return render_template('add_staff.html')
 
 
 

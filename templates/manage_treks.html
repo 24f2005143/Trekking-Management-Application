@@ -1,0 +1,60 @@
+<h1>Treks</h1>
+
+<a href="/admin">Back</a>
+
+<form method="GET" action="/admin/treks">
+    <input name="search" placeholder="Search treks">
+    <button type="submit">Search</button>
+</form>
+
+<hr>
+
+<h2>Add Trek</h2>
+
+<form method="POST" action="/add_trek">
+    <input name="trek_name" placeholder="Name">
+    <input name="location" placeholder="Location">
+    <input name="difficulty" placeholder="Difficulty">
+    <button>Add Trek</button>
+</form>
+
+<hr>
+
+<table border="1">
+
+<tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Location</th>
+    <th>Difficulty</th>
+    <th>Action</th>
+    <th>Assign Staff</th>
+</tr>
+
+{% for trek in treks %}
+<tr>
+    <td>{{ trek.id }}</td>
+    <td>{{ trek.trek_name }}</td>
+    <td>{{ trek.location }}</td>
+    <td>{{ trek.difficulty }}</td>
+
+    <td><a href="/delete_trek/{{ trek.id }}">Delete</a></td>
+
+    <td>
+        <form method="POST" action="/assign_staff/{{ trek.id }}">
+            <select name="staff_id">
+                {% for user in users %}
+                    {% if user.role == 'staff' %}
+                        <option value="{{ user.id }}">
+                            {{ user.name }}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            <button>Assign</button>
+        </form>
+    </td>
+</tr>
+{% endfor %}
+
+</table>
