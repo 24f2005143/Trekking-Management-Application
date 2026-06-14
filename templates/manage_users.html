@@ -1,74 +1,97 @@
-<h1>Manage Users</h1>
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block content %}
 
-<a href="/admin">Back</a>
+<h1 class="mb-3">Manage Users</h1>
 
-<form method="GET" action="/admin/users">
-    <input type="text" name="search" placeholder="Search users">
-    <button type="submit">Search</button>
+<a class="btn btn-secondary mb-3" href="/admin">Back</a>
+
+
+<form method="GET" action="{{ url_for('admin_bp.users') }}" class="mb-3">
+    <input class="form-control mb-2" type="text" name="search" placeholder="Search users">
+    <button class="btn btn-primary" type="submit">Search</button>
 </form>
 
-<br>
 
-<table border="1">
+<table class="table table-bordered table-striped">
 
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Role</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
 
-{% for user in users %}
-<tr>
-    <td>{{ user.id }}</td>
-    <td>{{ user.name }}</td>
-    <td>{{ user.email }}</td>
-    <td>{{ user.role }}</td>
+    <tbody>
 
-    <td>
-        {% if user.is_blacklisted %}
-            <span style="color:red;">Blacklisted</span>
-        {% else %}
-            <span style="color:green;">Active</span>
-        {% endif %}
-    </td>
+    {% for user in users %}
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
 
-    <td>
-
-        {% if user.role == 'admin' %}
-            <b>Admin</b>
-
-        {% elif user.role == 'staff' %}
-
-            <a href="/remove_staff/{{ user.id }}">
-                <button style="background-color:black; color:white;">
-                    Remove Staff
-                </button>
-            </a>
-
-        {% else %}
-
+        
+        <td>
             {% if user.is_blacklisted %}
-                <a href="/unblock_user/{{ user.id }}">
-                    <button style="background-color: green; color: white;">
-                        Unblock
-                    </button>
-                </a>
+                <span class="badge bg-danger">Blacklisted</span>
             {% else %}
-                <a href="/block_user/{{ user.id }}">
-                    <button style="background-color: red; color: white;">
-                        Block
-                    </button>
-                </a>
+                <span class="badge bg-success">Active</span>
+            {% endif %}
+        </td>
+
+        
+        <td>
+
+            {% if user.role == 'admin' %}
+
+                <span class="badge bg-dark">Admin</span>
+
+            {% elif user.role == 'staff' %}
+
+                {% if user.is_blacklisted %}
+                    <form method="POST" action="{{ url_for('admin_bp.unblock_staff', id=user.id) }}" style="display:inline;">
+                        <button class="btn btn-sm btn-success" type="submit">Unblock Staff</button>
+                    </form>
+                {% else %}
+                    <form method="POST" action="{{ url_for('admin_bp.block_staff', id=user.id) }}" style="display:inline;">
+                        <button class="btn btn-sm btn-warning" type="submit">Block Staff</button>
+                    </form>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('admin_bp.remove_staff', id=user.id) }}" style="display:inline; margin-left:4px;">
+                    <button class="btn btn-sm btn-dark" type="submit">Remove Staff</button>
+                </form>
+
+            {% else %}
+
+                {% if user.is_blacklisted %}
+
+                    <form method="POST" action="{{ url_for('admin_bp.unblock_user', id=user.id) }}" style="display:inline;">
+                        <button class="btn btn-sm btn-success" type="submit">Unblock</button>
+                    </form>
+
+                {% else %}
+
+                    <form method="POST" action="{{ url_for('admin_bp.block_user', id=user.id) }}" style="display:inline;">
+                        <button class="btn btn-sm btn-danger" type="submit">Block</button>
+                    </form>
+
+                {% endif %}
+
             {% endif %}
 
-        {% endif %}
+        </td>
 
-    </td>
+    </tr>
+    {% endfor %}
 
-</tr>
-{% endfor %}
+    </tbody>
 
 </table>
+
+{% endblock %}

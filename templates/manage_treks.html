@@ -1,60 +1,92 @@
-<h1>Treks</h1>
+{% extends "base.html" %}
+{% block title %}Treks{% endblock %}
+{% block content %}
 
-<a href="/admin">Back</a>
+<h1 class="mb-3">Treks</h1>
 
-<form method="GET" action="/admin/treks">
-    <input name="search" placeholder="Search treks">
-    <button type="submit">Search</button>
+<a class="btn btn-secondary mb-3" href="/admin">Back</a>
+
+
+<form method="GET" action="{{ url_for('admin_bp.manage_treks') }}" class="mb-3">
+    <input class="form-control mb-2" name="search" placeholder="Search treks">
+    <button class="btn btn-primary" type="submit">Search</button>
 </form>
 
 <hr>
 
-<h2>Add Trek</h2>
 
-<form method="POST" action="/add_trek">
-    <input name="trek_name" placeholder="Name">
-    <input name="location" placeholder="Location">
-    <input name="difficulty" placeholder="Difficulty">
-    <button>Add Trek</button>
+<h3>Add Trek</h3>
+
+<form method="POST" action="/add_trek" class="mb-4">
+    <input class="form-control mb-2" name="trek_name" placeholder="Name" required>
+    <input class="form-control mb-2" name="location" placeholder="Location" required>
+    <select class="form-select mb-2" name="difficulty" required>
+        <option value="Easy">Easy</option>
+        <option value="Moderate">Moderate</option>
+        <option value="Difficult">Difficult</option>
+    </select>
+    <input class="form-control mb-2" name="duration" placeholder="Duration" required>
+    <button class="btn btn-success" type="submit">Add Trek</button>
 </form>
 
 <hr>
 
-<table border="1">
 
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Location</th>
-    <th>Difficulty</th>
-    <th>Action</th>
-    <th>Assign Staff</th>
-</tr>
+<table class="table table-bordered table-striped">
 
-{% for trek in treks %}
-<tr>
-    <td>{{ trek.id }}</td>
-    <td>{{ trek.trek_name }}</td>
-    <td>{{ trek.location }}</td>
-    <td>{{ trek.difficulty }}</td>
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Difficulty</th>
+            <th>Duration</th>
+            <th>Action</th>
+            <th>Assign Staff</th>
+        </tr>
+    </thead>
 
-    <td><a href="/delete_trek/{{ trek.id }}">Delete</a></td>
+    <tbody>
 
-    <td>
-        <form method="POST" action="/assign_staff/{{ trek.id }}">
-            <select name="staff_id">
-                {% for user in users %}
-                    {% if user.role == 'staff' %}
-                        <option value="{{ user.id }}">
-                            {{ user.name }}
-                        </option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-            <button>Assign</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
+    {% for trek in treks %}
+    <tr>
+        <td>{{ trek.id }}</td>
+        <td>{{ trek.trek_name }}</td>
+        <td>{{ trek.location }}</td>
+        <td>{{ trek.difficulty }}</td>
+        <td>{{ trek.duration }}</td>
+
+        <td>
+            <a class="btn btn-warning btn-sm" href="{{ url_for('admin_bp.edit_trek', id=trek.id) }}">Edit</a>
+            <form method="POST" action="{{ url_for('admin_bp.delete_trek', id=trek.id) }}" style="display:inline;">
+                <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+            </form>
+        </td>
+
+        <td>
+            <form method="POST" action="/assign_staff/{{ trek.id }}">
+
+                <select class="form-select mb-2" name="staff_id">
+                    {% for user in users %}
+                        {% if user.role == 'staff' %}
+                            <option value="{{ user.id }}">
+                                {{ user.name }}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+
+                <button class="btn btn-primary btn-sm" type="submit">
+                    Assign
+                </button>
+            </form>
+        </td>
+
+    </tr>
+    {% endfor %}
+
+    </tbody>
 
 </table>
+
+{% endblock %}

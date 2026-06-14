@@ -1,56 +1,91 @@
-<h1>User Dashboard</h1>
-<h3>Welcome {{ current_user.name }}</h3>
+{% extends "base.html" %}
+{% block title %}User Dashboard{% endblock %}
+{% block content %}
 
-<a href="/logout">Logout</a>
+<h1 class="mb-2">User Dashboard</h1>
+
+<h4 class="mb-3">Welcome {{ current_user.name }}</h4>
+
+<a class="btn btn-danger mb-4" href="{{ url_for('logout') }}">
+    Logout
+</a>
 
 <hr>
 
-<h2>Available Treks</h2>
 
-<table border="1">
-<tr>
-    <th>Name</th>
-    <th>Location</th>
-    <th>Difficulty</th>
-    <th>Action</th>
-</tr>
+<h3>Available Treks</h3>
 
-{% for trek in treks %}
-<tr>
-    <td>{{ trek.trek_name }}</td>
-    <td>{{ trek.location }}</td>
-    <td>{{ trek.difficulty }}</td>
+<table class="table table-bordered table-striped">
 
-    <td>
-        <form method="POST" action="/book_trek/{{ trek.id }}">
-            <button type="submit">Book</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Difficulty</th>
+            <th>Duration</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for trek in treks %}
+    <tr>
+        <td>{{ trek.trek_name }}</td>
+        <td>{{ trek.location }}</td>
+        <td>{{ trek.difficulty }}</td>
+        <td>{{ trek.duration }}</td>
+
+        <td>
+            <form method="POST"
+                  action="{{ url_for('user_bp.book_trek', trek_id=trek.id) }}">
+                <button class="btn btn-success btn-sm" type="submit">
+                    Book
+                </button>
+            </form>
+        </td>
+
+    </tr>
+    {% endfor %}
+
+    </tbody>
+
 </table>
 
 <hr>
 
-<h2>My Bookings</h2>
+<h3>My Bookings</h3>
 
-<table border="1">
-<tr>
-    <th>Trek ID</th>
-    <th>Status</th>
-    <th>Payment</th>
-    <th>Action</th>
-</tr>
+<table class="table table-bordered table-striped">
 
-{% for b in bookings %}
-<tr>
-    <td>{{ b.trek_id }}</td>
-    <td>{{ b.booking_status }}</td>
-    <td>{{ b.payment_status }}</td>
+    <thead class="table-dark">
+        <tr>
+            <th>Trek ID</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Action</th>
+        </tr>
+    </thead>
 
-    <td>
-        <a href="/cancel_booking/{{ b.id }}">Cancel</a>
-    </td>
-</tr>
-{% endfor %}
+    <tbody>
+
+    {% for b in bookings %}
+    <tr>
+        <td>{{ b.trek_id }}</td>
+        <td>{{ b.booking_status }}</td>
+        <td>{{ b.payment_status }}</td>
+
+        <td>
+            <a class="btn btn-danger btn-sm"
+               href="{{ url_for('user_bp.cancel_booking', booking_id=b.id) }}">
+                Cancel
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+
 </table>
+
+{% endblock %}

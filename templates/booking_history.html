@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Booking History{% endblock %}
+{% block content %}
+
+<h1 class="mb-3">Booking History</h1>
+
+<a class="btn btn-secondary mb-3" href="/admin/bookings">Back</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Booking ID</th>
+            <th>User</th>
+            <th>Email</th>
+            <th>Trek</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+            <th>Payment</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for booking, user, trek in booking_history %}
+        <tr>
+            <td>{{ booking.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ trek.trek_name }}</td>
+            <td>{{ booking.booking_date }}</td>
+            <td>{{ booking.booking_status }}</td>
+            <td>{{ booking.payment_status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

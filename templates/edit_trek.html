@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Edit Trek{% endblock %}
+{% block content %}
+
+<h1 class="mb-3">Edit Trek</h1>
+
+<a class="btn btn-secondary mb-3" href="/admin/treks">Back</a>
+
+<form method="POST" class="mb-4">
+    <input class="form-control mb-2" name="trek_name" value="{{ trek.trek_name }}" required>
+    <input class="form-control mb-2" name="location" value="{{ trek.location }}" required>
+
+    <select class="form-select mb-2" name="difficulty" required>
+        <option value="Easy" {% if trek.difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+        <option value="Moderate" {% if trek.difficulty == 'Moderate' %}selected{% endif %}>Moderate</option>
+        <option value="Difficult" {% if trek.difficulty == 'Difficult' %}selected{% endif %}>Difficult</option>
+    </select>
+
+    <select class="form-select mb-2" name="duration" required>
+        <option value="" disabled>Choose Duration</option>
+        <option value="1" {% if trek.duration == 1 %}selected{% endif %}>1 Day</option>
+        <option value="2" {% if trek.duration == 2 %}selected{% endif %}>2 Days</option>
+        <option value="3" {% if trek.duration == 3 %}selected{% endif %}>3 Days</option>
+        <option value="4" {% if trek.duration == 4 %}selected{% endif %}>4 Days</option>
+        <option value="5" {% if trek.duration == 5 %}selected{% endif %}>5 Days</option>
+        <option value="6" {% if trek.duration == 6 %}selected{% endif %}>6 Days</option>
+        <option value="7" {% if trek.duration == 7 %}selected{% endif %}>7 Days</option>
+    </select>
+
+    <button class="btn btn-primary" type="submit">Update Trek</button>
+</form>
+
+{% endblock %}

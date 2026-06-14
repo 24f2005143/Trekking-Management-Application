@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, User, StaffProfile,Trek,Booking
-from flask_login import LoginManager,login_user,logout_user,login_required,current_user
+from models import db, User, StaffProfile, Trek, Booking
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import inspect, text
 
 from routes.admin_routes import admin_bp
 from routes.user_routes import user_bp
+from routes.staff_routes import staff_bp
 
 app = Flask(__name__)
-app.register_blueprint(admin_bp)
-app.register_blueprint(user_bp)
 
 app.config['SECRET_KEY'] = 'secret123'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///trek.db'
@@ -19,6 +20,11 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 
+app.register_blueprint(admin_bp)
+app.register_blueprint(user_bp)
+app.register_blueprint(staff_bp)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -27,21 +33,24 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-    admin = User.query.filter_by(role='admin').first()
+    trek_columns = {column["name"] for column in inspect(db.engine).get_columns("trek")}
+    if "duration" not in trek_columns:
+        db.session.execute(text("ALTER TABLE trek ADD COLUMN duration INTEGER"))
+        db.session.commit()
+
+    admin = User.query.filter_by(email="admin@gmail.com").first()
 
     if not admin:
         admin_user = User(
-            name='Admin',
-            email='admin@gmail.com',
-            password='admin123',
-            role='admin'
+            name="Admin",
+            email="admin@gmail.com",
+            password=generate_password_hash("admin123"),  # ✅ FIXED
+            role="admin"
         )
-
         db.session.add(admin_user)
         db.session.commit()
 
-        print("Admin Created")
-
+        print("✅ Admin created: admin@gmail.com / admin123")
 
 
 @app.route('/')
@@ -51,118 +60,59 @@ def home():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
 
-        existing_user = User.query.filter_by(email=email).first()
-
-        if existing_user:
+        if User.query.filter_by(email=request.form['email']).first():
             return "Email already exists"
 
-        new_user = User(
-            name=name,
-            email=email,
-            password=password,
+        user = User(
+            name=request.form['name'],
+            email=request.form['email'],
+            password=generate_password_hash(request.form['password']),  # ✅ FIXED
             role='user'
         )
 
-        db.session.add(new_user)
+        db.session.add(user)
         db.session.commit()
 
-        return redirect(url_for('login'))
+        return redirect('/login')
+
     return render_template('register.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
 
-        user = User.query.filter_by(email=email,password=password).first()
+        user = User.query.filter_by(email=request.form['email']).first()
 
-        if user:
-            if user.is_blacklisted:
-                return "You are blacklisted"
+        if not user:
+            return "Invalid email"
 
-            login_user(user)
+        # ✅ FIXED PASSWORD CHECK
+        if not check_password_hash(user.password, request.form['password']):
+            return "Invalid password"
 
-            if user.role == 'admin':
-                return redirect('/admin')
-            elif user.role == 'staff':
-                return redirect(url_for('staff_dashboard'))
-            else:
-                return redirect(url_for('user_dashboard'))
+        if user.is_blacklisted:
+            return "You are blocked"
 
+        login_user(user)
+
+        if user.role == 'admin':
+            return redirect('/admin')
+        elif user.role == 'staff':
+            return redirect('/staff')
         else:
-            return "Invalid Email or Password"
+            return redirect('/user')
+
     return render_template('login.html')
 
 
 @app.route('/logout')
 @login_required
 def logout():
-
     logout_user()
-    return redirect(url_for('login'))
-
-
-
-
-@app.route('/staff')
-@login_required
-def staff_dashboard():
-
-    if current_user.role != 'staff':
-        return "Access Denied"
-
-    return render_template('staff_dashboard.html')
-
-
-@app.route('/user')
-@login_required
-def user_dashboard():
-
-    if current_user.role != 'user':
-        return "Access Denied"
-    return render_template('user_dashboard.html')
-
-
-@app.route('/add_staff',methods=['GET', 'POST'])
-@login_required
-def add_staff():
-
-    if current_user.role != 'admin':
-        return "Access Denied"
-
-    if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-
-        existing_user = User.query.filter_by(email=email).first()
-
-        if existing_user:
-            return "Email already exists"
-
-        staff_user = User(name=name,email=email,password=password,role='staff')
-
-        db.session.add(staff_user)
-        db.session.commit()
-
-        profile = StaffProfile(user_id=staff_user.id)
-
-        db.session.add(profile)
-        db.session.commit()
-
-        return "Staff Added Successfully"
-    return render_template('add_staff.html')
-
-
+    return redirect('/login')
 
 
 if __name__ == '__main__':
