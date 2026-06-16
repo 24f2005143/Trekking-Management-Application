@@ -5,51 +5,63 @@
 <h1 class="mb-2">User Dashboard</h1>
 
 <h4 class="mb-3">Welcome {{ current_user.name }}</h4>
-
-<a class="btn btn-danger mb-4" href="{{ url_for('logout') }}">
-    Logout
-</a>
+<a class="btn btn-info mb-3" href="/history">Trek History</a>
+<a class="btn btn-secondary mb-3 ms-2" href="/profile">My Profile</a>
 
 <hr>
 
+<h3>Search Treks</h3>
+<form method="GET" action="/user" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input class="form-control" name="location" placeholder="Filter by location" value="{{ location }}">
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="difficulty">
+            <option value="">All Difficulties</option>
+            <option value="Easy" {% if difficulty == 'Easy' %}selected{% endif %}>Easy</option>
+            <option value="Moderate" {% if difficulty == 'Moderate' %}selected{% endif %}>Moderate</option>
+            <option value="Difficult" {% if difficulty == 'Difficult' %}selected{% endif %}>Difficult</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary" type="submit">Search</button>
+        <a class="btn btn-outline-secondary ms-1" href="/user">Clear</a>
+    </div>
+</form>
 
 <h3>Available Treks</h3>
 
 <table class="table table-bordered table-striped">
-
     <thead class="table-dark">
         <tr>
             <th>Name</th>
             <th>Location</th>
             <th>Difficulty</th>
             <th>Duration</th>
+            <th>Slots</th>
             <th>Action</th>
         </tr>
     </thead>
-
     <tbody>
-
     {% for trek in treks %}
     <tr>
         <td>{{ trek.trek_name }}</td>
         <td>{{ trek.location }}</td>
         <td>{{ trek.difficulty }}</td>
         <td>{{ trek.duration }}</td>
-
+        <td>{{ trek.available_slots }}</td>
         <td>
-            <form method="POST"
-                  action="{{ url_for('user_bp.book_trek', trek_id=trek.id) }}">
-                <button class="btn btn-success btn-sm" type="submit">
-                    Book
-                </button>
-            </form>
+            {% if trek.id in booked_trek_ids %}
+                <span class="badge bg-secondary">Already Booked</span>
+            {% else %}
+                <form method="POST" action="{{ url_for('user_bp.book_trek', trek_id=trek.id) }}">
+                    <button class="btn btn-success btn-sm" type="submit">Book</button>
+                </form>
+            {% endif %}
         </td>
-
     </tr>
     {% endfor %}
-
     </tbody>
-
 </table>
 
 <hr>
@@ -57,35 +69,30 @@
 <h3>My Bookings</h3>
 
 <table class="table table-bordered table-striped">
-
     <thead class="table-dark">
         <tr>
-            <th>Trek ID</th>
+            <th>Trek Name</th>
+            <th>Booking Date</th>
             <th>Status</th>
             <th>Payment</th>
             <th>Action</th>
         </tr>
     </thead>
-
     <tbody>
-
     {% for b in bookings %}
     <tr>
-        <td>{{ b.trek_id }}</td>
+        <td>{{ b.trek.trek_name }}</td>
+        <td>{{ b.booking_date.strftime('%Y-%m-%d') }}</td>
         <td>{{ b.booking_status }}</td>
         <td>{{ b.payment_status }}</td>
-
         <td>
-            <a class="btn btn-danger btn-sm"
-               href="{{ url_for('user_bp.cancel_booking', booking_id=b.id) }}">
-                Cancel
-            </a>
+            <form method="POST" action="{{ url_for('user_bp.cancel_booking', booking_id=b.id) }}">
+                <button class="btn btn-danger btn-sm" type="submit">Cancel</button>
+            </form>
         </td>
     </tr>
     {% endfor %}
-
     </tbody>
-
 </table>
 
 {% endblock %}

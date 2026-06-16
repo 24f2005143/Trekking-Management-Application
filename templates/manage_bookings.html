@@ -1,38 +1,62 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
+{% block title %}Manage Bookings{% endblock %}
 {% block content %}
 
-<h1>Bookings</h1>
+<h1 class="mb-3">Manage Bookings</h1>
+<a class="btn btn-secondary mb-3" href="/admin">Back to Dashboard</a>
+<a class="btn btn-info mb-3 ms-2" href="{{ url_for('admin_bp.booking_history') }}">View Full History</a>
 
-<a href="/admin">Back</a>
+<!-- Filter -->
+<form method="GET" action="{{ url_for('admin_bp.bookings') }}" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <select class="form-select" name="status">
+            <option value="">All Statuses</option>
+            <option value="Booked">Booked</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select class="form-select" name="payment">
+            <option value="">All Payments</option>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary">Filter</button>
+    </div>
+</form>
 
-<a href="{{ url_for('admin_bp.booking_history') }}">View Booking History</a>
-
-<table border="1">
-
-<tr>
-    <th>ID</th>
-    <th>User ID</th>
-    <th>Trek ID</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
-
-{% for b in bookings %}
-<tr>
-    <td>{{ b.id }}</td>
-    <td>{{ b.user_id }}</td>
-    <td>{{ b.trek_id }}</td>
-    <td>{{ b.booking_status }}</td>
-    <td>
-        <form method="POST" action="{{ url_for('admin_bp.cancel_booking', id=b.id) }}">
-            <button type="submit">Cancel</button>
-        </form>
-    </td>
-</tr>
-{% endfor %}
-
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Booking ID</th>
+            <th>User Name</th>
+            <th>Trek Name</th>
+            <th>Booking Date</th>
+            <th>Status</th>
+            <th>Payment</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for booking, user, trek in bookings %}
+    <tr>
+        <td>{{ booking.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ trek.trek_name }}</td>
+        <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+        <td>{{ booking.booking_status }}</td>
+        <td>{{ booking.payment_status }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('admin_bp.cancel_booking', id=booking.id) }}">
+                <button class="btn btn-danger btn-sm" type="submit"
+                    onclick="return confirm('Cancel this booking?')">Cancel</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
 </table>
-
 
 {% endblock %}

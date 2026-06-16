@@ -48,11 +48,9 @@
         <td>
 
             {% if user.role == 'admin' %}
-
                 <span class="badge bg-dark">Admin</span>
 
             {% elif user.role == 'staff' %}
-
                 {% if user.is_blacklisted %}
                     <form method="POST" action="{{ url_for('admin_bp.unblock_staff', id=user.id) }}" style="display:inline;">
                         <button class="btn btn-sm btn-success" type="submit">Unblock Staff</button>
@@ -70,23 +68,18 @@
             {% else %}
 
                 {% if user.is_blacklisted %}
-
                     <form method="POST" action="{{ url_for('admin_bp.unblock_user', id=user.id) }}" style="display:inline;">
                         <button class="btn btn-sm btn-success" type="submit">Unblock</button>
                     </form>
 
                 {% else %}
-
                     <form method="POST" action="{{ url_for('admin_bp.block_user', id=user.id) }}" style="display:inline;">
                         <button class="btn btn-sm btn-danger" type="submit">Block</button>
                     </form>
 
                 {% endif %}
-
             {% endif %}
-
         </td>
-
     </tr>
     {% endfor %}
 

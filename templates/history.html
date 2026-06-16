@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Trek History{% endblock %}
+
+{% block content %}
+
+<h2>Trek History</h2>
+
+<a class="btn btn-secondary mb-3" href="/user">
+    Back
+</a>
+
+<table class="table table-bordered">
+
+    <tr>
+        <th>Trek Name</th>
+        <th>Location</th>
+        <th>Booking Date</th>
+        <th>Status</th>
+        <th>Payment</th>
+    </tr>
+
+    {% for booking in bookings %}
+    <tr>
+        <td>{{ booking.trek.trek_name }}</td>
+        <td>{{ booking.trek.location }}</td>
+        <td>{{ booking.booking_date }}</td>
+        <td>{{ booking.booking_status }}</td>
+        <td>{{ booking.payment_status }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
