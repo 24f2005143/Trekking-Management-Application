@@ -18,14 +18,21 @@
 <h3>Add Trek</h3>
 
 <form method="POST" action="/add_trek" class="mb-4">
-    <input class="form-control mb-2" name="trek_name" placeholder="Name" required>
+    <input class="form-control mb-2" name="trek_name" placeholder="Trek Name" required>
     <input class="form-control mb-2" name="location" placeholder="Location" required>
+    <textarea class="form-control mb-2" name="description" placeholder="Description" rows="2"></textarea>
     <select class="form-select mb-2" name="difficulty" required>
         <option value="Easy">Easy</option>
         <option value="Moderate">Moderate</option>
         <option value="Difficult">Difficult</option>
     </select>
-    <input class="form-control mb-2" name="duration" placeholder="Duration" required>
+    <input class="form-control mb-2" type="number" name="duration" placeholder="Duration (days)" required>
+    <input class="form-control mb-2" type="number" name="available_slots" placeholder="Available Slots" value="10" required>
+    <select class="form-select mb-2" name="status">
+        <option value="Pending">Pending</option>
+        <option value="Open">Open</option>
+        <option value="Closed">Closed</option>
+    </select>
     <button class="btn btn-success" type="submit">Add Trek</button>
 </form>
 
@@ -41,6 +48,8 @@
             <th>Location</th>
             <th>Difficulty</th>
             <th>Duration</th>
+            <th>Slots</th>
+            <th>Status</th>
             <th>Action</th>
             <th>Assign Staff</th>
         </tr>
@@ -55,12 +64,29 @@
         <td>{{ trek.location }}</td>
         <td>{{ trek.difficulty }}</td>
         <td>{{ trek.duration }}</td>
+        <td>{{ trek.available_slots }}</td>
+        <td>
+            {% if trek.status == "Open" %}
+                <span class="badge bg-success">Open</span>
+            {% elif trek.status == "Pending" %}
+                <span class="badge bg-warning text-dark">Pending</span>
+            {% elif trek.status == "Completed" %}
+                <span class="badge bg-primary">Completed</span>
+            {% else %}
+                <span class="badge bg-secondary">{{ trek.status }}</span>
+            {% endif %}
+        </td>
 
         <td>
             <a class="btn btn-warning btn-sm" href="{{ url_for('admin_bp.edit_trek', id=trek.id) }}">Edit</a>
             <form method="POST" action="{{ url_for('admin_bp.delete_trek', id=trek.id) }}" style="display:inline;">
                 <button class="btn btn-danger btn-sm" type="submit">Delete</button>
             </form>
+            {% if trek.status == "Pending" %}
+            <form method="POST" action="{{ url_for('admin_bp.approve_trek', id=trek.id) }}" style="display:inline;">
+                <button class="btn btn-success btn-sm" type="submit">Approve</button>
+            </form>
+            {% endif %}
         </td>
 
         <td>

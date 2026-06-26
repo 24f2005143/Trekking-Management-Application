@@ -6,7 +6,6 @@
 <a class="btn btn-secondary mb-3" href="/admin">Back to Dashboard</a>
 <a class="btn btn-info mb-3 ms-2" href="{{ url_for('admin_bp.booking_history') }}">View Full History</a>
 
-<!-- Filter -->
 <form method="GET" action="{{ url_for('admin_bp.bookings') }}" class="row g-2 mb-3">
     <div class="col-md-3">
         <select class="form-select" name="status">

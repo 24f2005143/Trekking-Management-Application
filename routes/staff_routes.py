@@ -5,6 +5,29 @@ from sqlalchemy import func
 
 staff_bp = Blueprint('staff_bp', __name__)
 
+@staff_bp.route('/staff/profile', methods=['GET', 'POST'])
+@login_required
+def staff_profile():
+    if current_user.role != 'staff':
+        return "Access Denied"
+
+    profile = StaffProfile.query.filter_by(user_id=current_user.id).first()
+
+    if request.method == 'POST':
+        existing = User.query.filter_by(email=request.form['email']).first()
+        if existing and existing.id != current_user.id:
+            flash("Email already taken by another account.", "danger")
+            return redirect('/staff/profile')
+
+        current_user.name = request.form['name']
+        current_user.email = request.form['email']
+        profile.phone = request.form.get('phone')
+        profile.experience = request.form.get('experience')
+        db.session.commit()
+        flash("Profile updated successfully!", "success")
+        return redirect('/staff/profile')
+
+    return render_template('staff_profile.html', profile=profile)
 
 @staff_bp.route('/staff')
 @login_required
@@ -56,8 +79,9 @@ def remove_participant(booking_id):
     if trek.staff_id != profile.id:
         return "Not allowed"
 
-    trek.available_slots += 1
-    db.session.delete(booking)
+    if booking.booking_status == "Booked":
+        trek.available_slots += 1
+    booking.booking_status = "Cancelled"
     db.session.commit()
     flash("Participant removed.", "info")
     return redirect(f'/staff/trek/{trek.id}')
@@ -80,6 +104,9 @@ def update_status(trek_id):
 
     if status in allowed_status:
         trek.status = status
+        if status == "Completed":
+            Booking.query.filter_by(trek_id=trek.id, booking_status="Booked"
+            ).update({"booking_status": "Completed"})
         db.session.commit()
         flash(f"Trek status updated to {status}.", "success")
     else:

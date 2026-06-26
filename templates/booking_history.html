@@ -2,7 +2,7 @@
 {% block title %}Booking History{% endblock %}
 {% block content %}
 
-<h1 class="mb-3">Booking History</h1>
+<h1 class="mb-3">All Booking History</h1>
 
 <a class="btn btn-secondary mb-3" href="/admin/bookings">Back</a>
 
@@ -13,8 +13,9 @@
             <th>User</th>
             <th>Email</th>
             <th>Trek</th>
+            <th>Trek Status</th>
             <th>Booking Date</th>
-            <th>Status</th>
+            <th>Booking Status</th>
             <th>Payment</th>
         </tr>
     </thead>
@@ -25,8 +26,29 @@
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>{{ trek.trek_name }}</td>
-            <td>{{ booking.booking_date }}</td>
-            <td>{{ booking.booking_status }}</td>
+            <td>
+                {% if trek.status == "Completed" %}
+                    <span class="badge bg-success">Completed</span>
+                {% elif trek.status == "Open" %}
+                    <span class="badge bg-primary">Open</span>
+                {% elif trek.status == "Pending" %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ trek.status }}</span>
+                {% endif %}
+            </td>
+            <td>{{ booking.booking_date.strftime('%Y-%m-%d') }}</td>
+            <td>
+                {% if booking.booking_status == "Booked" %}
+                    <span class="badge bg-primary">Booked</span>
+                {% elif booking.booking_status == "Cancelled" %}
+                    <span class="badge bg-danger">Cancelled</span>
+                {% elif booking.booking_status == "Completed" %}
+                    <span class="badge bg-success">Completed</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ booking.booking_status }}</span>
+                {% endif %}
+            </td>
             <td>{{ booking.payment_status }}</td>
         </tr>
         {% endfor %}

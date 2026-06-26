@@ -39,16 +39,18 @@ with app.app_context():
     if "description" not in trek_columns:
         db.session.execute(text("ALTER TABLE trek ADD COLUMN description TEXT"))
         db.session.commit()
+    user_columns = {col["name"] for col in inspect(db.engine).get_columns("user")}
+    if "is_approved" not in user_columns:
+        db.session.execute(text("ALTER TABLE user ADD COLUMN is_approved BOOLEAN DEFAULT 1"))
+        db.session.commit()
 
     
     admin = User.query.filter_by(email="admin@gmail.com").first()
     if not admin:
-        admin_user = User(
-            name="Admin",
+        admin_user = User(name="Admin",
             email="admin@gmail.com",
             password=generate_password_hash("admin123"),
-            role="admin"
-        )
+            role="admin")
         db.session.add(admin_user)
         db.session.commit()
         print("Admin created: admin@gmail.com / admin123")
@@ -66,15 +68,25 @@ def register():
             flash("Email already exists. Please login.", "danger")
             return redirect('/register')
 
-        user = User(
-            name=request.form['name'],
+        role = request.form.get('role', 'user')
+        if role not in ('user', 'staff'):
+            role = 'user'
+
+        user = User(name=request.form['name'],
             email=request.form['email'],
             password=generate_password_hash(request.form['password']),
-            role='user'
-        )
+            role=role, is_approved=(role == 'user'))
+        
         db.session.add(user)
         db.session.commit()
-        flash("Registration successful! Please login.", "success")
+
+        if role == 'staff':
+            profile = StaffProfile(user_id=user.id)
+            db.session.add(profile)
+            db.session.commit()
+            flash("Registration successful! Please login.", "success")
+        else:
+            flash("Registration successful! Please login.", "success")
         return redirect('/login')
 
     return render_template('register.html')
@@ -91,6 +103,10 @@ def login():
 
         if user.is_blacklisted:
             flash("Your account has been blocked. Contact admin.", "danger")
+            return redirect('/login')
+        
+        if user.role == 'staff' and not user.is_approved:
+            flash("Your staff account is awaiting Admin approval.", "warning")
             return redirect('/login')
 
         login_user(user)

@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
 
     role = db.Column(db.String(20), nullable=False)  
     is_blacklisted = db.Column(db.Boolean, default=False)
+    is_approved = db.Column(db.Boolean, default=True)
 
     bookings = db.relationship('Booking', backref='user', lazy=True)
     staff_profile = db.relationship('StaffProfile', backref='user', uselist=False)

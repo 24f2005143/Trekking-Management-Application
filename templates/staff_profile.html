@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+
+<h2 class="mb-3">My Profile</h2>
+<a class="btn btn-secondary mb-3" href="/staff">Back</a>
+
+<div class="row">
+<div class="col-md-5">
+
+<form method="POST">
+    <label class="form-label">Full Name</label>
+    <input class="form-control mb-2" name="name" value="{{ current_user.name }}" required>
+
+    <label class="form-label">Email</label>
+    <input class="form-control mb-2" type="email" name="email" value="{{ current_user.email }}" required>
+
+    <label class="form-label">Phone</label>
+    <input class="form-control mb-2" name="phone" value="{{ profile.phone or '' }}">
+
+    <label class="form-label">Experience</label>
+    <input class="form-control mb-2" name="experience" value="{{ profile.experience or '' }}">
+
+    <button class="btn btn-primary">Update Profile</button>
+</form>
+
+<hr>
+<p><b>Role:</b> {{ current_user.role }}</p>
+<p><b>Status:</b> {{ profile.status }}</p>
+<p><b>Member since:</b> {{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+
+</div>
+</div>
+
+{% endblock %}

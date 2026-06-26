@@ -39,6 +39,8 @@
         <td>
             {% if user.is_blacklisted %}
                 <span class="badge bg-danger">Blacklisted</span>
+            {% elif user.role == 'staff' and not user.is_approved %}
+                <span class="badge bg-secondary">Pending Approval</span>
             {% else %}
                 <span class="badge bg-success">Active</span>
             {% endif %}
@@ -51,6 +53,11 @@
                 <span class="badge bg-dark">Admin</span>
 
             {% elif user.role == 'staff' %}
+                 {% if not user.is_approved %}
+                    <form method="POST" action="{{ url_for('admin_bp.approve_staff', id=user.id) }}" style="display:inline;">
+                        <button class="btn btn-sm btn-primary" type="submit">Approve</button>
+                    </form>
+                {% endif %}
                 {% if user.is_blacklisted %}
                     <form method="POST" action="{{ url_for('admin_bp.unblock_staff', id=user.id) }}" style="display:inline;">
                         <button class="btn btn-sm btn-success" type="submit">Unblock Staff</button>

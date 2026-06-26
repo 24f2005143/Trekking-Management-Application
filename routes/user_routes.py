@@ -23,11 +23,14 @@ def user_dashboard():
 
     treks = treks.all()
 
-    bookings = Booking.query.filter_by(user_id=current_user.id).all()
+    bookings = Booking.query.filter_by(user_id=current_user.id, booking_status="Booked").all()
     booked_trek_ids = [b.trek_id for b in bookings]
 
-    return render_template("user_dashboard.html",treks=treks,bookings=bookings,booked_trek_ids=booked_trek_ids,
-        location=location,difficulty=difficulty)
+    return render_template("user_dashboard.html",treks=treks,
+        bookings=bookings,
+        booked_trek_ids=booked_trek_ids,
+        location=location,
+        difficulty=difficulty)
 
 
 @user_bp.route('/book_trek/<int:trek_id>', methods=['POST'])
@@ -43,7 +46,7 @@ def book_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
 
     
-    existing = Booking.query.filter_by(user_id=current_user.id, trek_id=trek.id).first()
+    existing = Booking.query.filter_by(user_id=current_user.id, trek_id=trek.id, booking_status="Booked").first()
     if existing:
         flash("You have already booked this trek.", "warning")
         return redirect('/user')
@@ -72,9 +75,12 @@ def cancel_booking(booking_id):
     if booking.user_id != current_user.id:
         return "Not allowed"
 
-    trek = booking.trek
-    trek.available_slots += 1
-    db.session.delete(booking)
+    if booking.booking_status != "Booked":
+        flash("This booking cannot be cancelled.", "warning")
+        return redirect('/user')
+
+    booking.booking_status = "Cancelled"
+    booking.trek.available_slots += 1
     db.session.commit()
     flash("Booking cancelled.", "info")
     return redirect('/user')

@@ -34,8 +34,10 @@ def users():
     query = User.query
 
     if search:
-        query = query.filter((User.name.like(f"%{search}%")) |(User.email.like(f"%{search}%")))
-
+        conditions = [User.name.like(f"%{search}%"), User.email.like(f"%{search}%")]
+        if search.isdigit():
+            conditions.append(User.id == int(search))
+        query = query.filter(db.or_(*conditions))
     if role_filter:
         query = query.filter_by(role=role_filter)
 
@@ -108,7 +110,10 @@ def manage_treks():
     query = Trek.query
 
     if search:
-        query = query.filter((Trek.trek_name.like(f"%{search}%")) |(Trek.location.like(f"%{search}%")))
+        conditions = [Trek.trek_name.like(f"%{search}%"), Trek.location.like(f"%{search}%")]
+        if search.isdigit():
+            conditions.append(Trek.id == int(search))
+        query = query.filter(db.or_(*conditions))
     if difficulty:
         query = query.filter_by(difficulty=difficulty)
     if status:
@@ -118,6 +123,20 @@ def manage_treks():
     staff_users = User.query.filter_by(role='staff').all()
 
     return render_template('manage_treks.html', treks=treks, users=staff_users)
+
+@admin_bp.route('/approve_trek/<int:id>', methods=['POST'])
+@login_required
+def approve_trek(id):
+    if admin_only():
+        return "Access Denied"
+    trek = Trek.query.get_or_404(id)
+    if trek.status == "Pending":
+        trek.status = "Open"
+        db.session.commit()
+        flash(f"Trek '{trek.trek_name}' approved and opened.", "success")
+    else:
+        flash("Trek is not in Pending status.", "warning")
+    return redirect('/admin/treks')
 
 
 @admin_bp.route('/add_trek', methods=['POST'])
@@ -131,7 +150,8 @@ def add_trek():
         description=request.form.get('description'),
         duration=request.form.get('duration'),
         difficulty=request.form.get('difficulty'),
-        available_slots=int(request.form.get('available_slots', 10)))
+        available_slots=int(request.form.get('available_slots', 10)),
+        status=request.form.get('status', 'Pending'))
     db.session.add(trek)
     db.session.commit()
     flash("Trek added successfully!", "success")
@@ -164,6 +184,7 @@ def edit_trek(id):
         trek.duration = request.form.get('duration')
         trek.difficulty = request.form.get('difficulty')
         trek.available_slots = request.form.get('available_slots')
+        trek.status = request.form.get('status', trek.status)
         db.session.commit()
         flash("Trek updated!", "success")
         return redirect('/admin/treks')
@@ -180,6 +201,7 @@ def bookings():
     status = request.args.get('status', '')
     payment = request.args.get('payment', '')
 
+    
     query = db.session.query(Booking, User, Trek)\
         .join(User, Booking.user_id == User.id)\
         .join(Trek, Booking.trek_id == Trek.id)
@@ -212,14 +234,25 @@ def cancel_booking(id):
     if admin_only():
         return "Access Denied"
     booking = Booking.query.get_or_404(id)
-    trek = Trek.query.get(booking.trek_id)
-    if trek:
-        trek.available_slots += 1
-    db.session.delete(booking)
+    if booking.booking_status == "Booked":
+        booking.trek.available_slots += 1
+    booking.booking_status = "Cancelled"
     db.session.commit()
     flash("Booking cancelled.", "info")
     return redirect('/admin/bookings')
 
+@admin_bp.route('/approve_staff/<int:id>', methods=['POST'])
+@login_required
+def approve_staff(id):
+    if admin_only():
+        return "Access Denied"
+    staff = User.query.get_or_404(id)
+    if staff.role != 'staff':
+        return "Not a staff member"
+    staff.is_approved = True
+    db.session.commit()
+    flash(f"Staff {staff.name} approved.", "success")
+    return redirect('/admin/users')
 
 @admin_bp.route('/add_staff', methods=['GET', 'POST'])
 @login_required
@@ -232,9 +265,10 @@ def add_staff():
             flash("Email already exists.", "danger")
             return redirect('/add_staff')
 
-        staff = User(name=request.form.get('name'),email=request.form.get('email'),
+        staff = User(name=request.form.get('name'),
+            email=request.form.get('email'),
             password=generate_password_hash(request.form.get('password')),
-            role='staff')
+            role='staff',is_approved=True)
         db.session.add(staff)
         db.session.commit()
 
