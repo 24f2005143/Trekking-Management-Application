@@ -95,9 +95,10 @@
                 <select class="form-select mb-2" name="staff_id">
                     {% for user in users %}
                         {% if user.role == 'staff' %}
-                            <option value="{{ user.id }}">
-                                {{ user.name }}
-                            </option>
+                        <option value="{{ user.id }}"
+                             {% if user.staff_profile and trek.staff_id == user.staff_profile.id %}selected{% endif %}>
+                            {{ user.name }}
+                        </option>
                         {% endif %}
                     {% endfor %}
                 </select>

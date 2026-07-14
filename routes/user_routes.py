@@ -67,7 +67,7 @@ def book_trek(trek_id):
     return redirect('/user')
 
 
-@user_bp.route('/cancel_booking/<int:booking_id>', methods=['POST'])
+@user_bp.route('/user/cancel_booking/<int:booking_id>', methods=['POST'])
 @login_required
 def cancel_booking(booking_id):
     booking = Booking.query.get_or_404(booking_id)

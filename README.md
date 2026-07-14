@@ -60,21 +60,42 @@ Users can explore and participate in trekking events.
 
 #  Database Tables
 
+## User Table
+Stores authentication and role information for all users in the system.
+
+### Fields:
+- User ID
+- Name
+- Email
+- Password
+- Role
+- Is Blacklisted
+- Is Approved
+
+## Staff Profile Table
+Stores additional details for trek staff members.
+
+### Fields:
+- Staff ID
+- User ID
+- Phone
+- Experience
+- Status
+
 ## Trek Table
-Stores trekking event details.
+Stores information about trekking events.
 
 ### Fields:
 - Trek ID
 - Trek Name
 - Location
+- Description
 - Difficulty
 - Duration
 - Available Slots
-- Assigned Staff ID
 - Status
-- Start Date
-- End Date
-
+- Created At
+- Staff ID
 
 ## Booking Table
 Stores booking details of trekkers.
@@ -85,17 +106,7 @@ Stores booking details of trekkers.
 - Trek ID
 - Booking Date
 - Booking Status
-
-
-## Staff Profile Table
-Stores trek staff information.
-
-### Fields:
-- Staff ID
-- Name
-- Contact Details
-- Assigned Treks
-- Status
+- Payment Status
 
 
 # Technologies Used
